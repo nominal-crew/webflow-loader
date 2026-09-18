@@ -11,10 +11,12 @@
     "format:check": "prettier --check .",
     "fix": "pnpm lint:fix && pnpm format",
     "check": "pnpm lint && pnpm format:check",
-    "deploy": "pnpm fix && pnpm check && node scripts/deploy.mjs"
+    "build": "esbuild src/loader.js --minify --outfile=dist/loader.js",
+    "deploy:loader": "pnpm fix && pnpm check && pnpm build && node scripts/deploy.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
+    "esbuild": "^0.28.2",
     "eslint": "^9.0.0",
     "eslint-config-prettier": "^10.0.0",
     "globals": "^16.0.0",

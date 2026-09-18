@@ -2,7 +2,7 @@ import { spawnSync } from 'node:child_process';
 import { resolve } from 'node:path';
 
 const BUCKET = 'nominalcrew-cdn';
-const LOCAL_FILE = resolve('src/loader.js');
+const LOCAL_FILE = resolve('dist/loader.js');
 const REMOTE_KEY = 'loader.js';
 
 console.log('Deploying Nominal Crew Webflow loader...');
