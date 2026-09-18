@@ -17,19 +17,13 @@ https://cdn.nominalcrew.com/loader.js
 Add the following script to the Webflow project:
 
 ```html
-<script
-  src="https://cdn.nominalcrew.com/loader.js"
-  data-project="project-slug"
-></script>
+<script src="https://cdn.nominalcrew.com/loader.js" data-project="project-slug"></script>
 ```
 
 Example:
 
 ```html
-<script
-  src="https://cdn.nominalcrew.com/loader.js"
-  data-project="abma"
-></script>
+<script src="https://cdn.nominalcrew.com/loader.js" data-project="abma"></script>
 ```
 
 ## Environment detection
@@ -81,6 +75,20 @@ cdn.nominalcrew.com/
 
 ## Install
 
+Install dependencies:
+
+```bash
+pnpm install
+```
+
+If pnpm asks you to approve dependency build scripts:
+
+```bash
+pnpm approve-builds
+```
+
+Approve the required packages, then run:
+
 ```bash
 pnpm install
 ```
@@ -91,7 +99,17 @@ pnpm install
 pnpm exec wrangler login
 ```
 
+## Fix
+
+Automatically fixes ESLint issues where possible and formats the project with Prettier.
+
+```bash
+pnpm fix
+```
+
 ## Check
+
+Runs ESLint and checks that all files are correctly formatted.
 
 ```bash
 pnpm check
@@ -99,17 +117,29 @@ pnpm check
 
 ## Format
 
+Formats the entire project with Prettier.
+
 ```bash
 pnpm format
 ```
 
 ## Deploy
 
+Formats and fixes the project, validates it, then uploads the loader to Cloudflare R2.
+
 ```bash
 pnpm deploy
 ```
 
-The deploy command uploads:
+The deploy command runs:
+
+```text
+pnpm fix
+→ pnpm check
+→ upload to R2
+```
+
+It uploads:
 
 ```text
 src/loader.js
