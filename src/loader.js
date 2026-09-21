@@ -1,5 +1,7 @@
 (() => {
   const CDN_ORIGIN = 'https://cdn.nominalcrew.com';
+  const STORAGE_KEY = 'nc-env';
+  const ENVIRONMENTS = new Set(['dev', 'staging', 'production']);
 
   const currentScript = document.currentScript;
   const project = currentScript?.dataset.project?.trim();
@@ -9,42 +11,96 @@
     return;
   }
 
+  const jsFile = currentScript.dataset.js?.trim() || 'bundle.js';
+  const cssFile = currentScript.dataset.css?.trim() || 'bundle.css';
+  const devOrigin = (currentScript.dataset.devOrigin?.trim() || 'https://localhost:3000').replace(
+    /\/$/,
+    '',
+  );
+  const devEntry = currentScript.dataset.devEntry?.trim() || '/src/js/main.js';
+
   const params = new URLSearchParams(window.location.search);
   const forcedEnvironment = params.get('nc-env');
 
-  const isWebflowStaging = window.location.hostname.endsWith('.webflow.io');
+  try {
+    if (forcedEnvironment === 'off') {
+      sessionStorage.removeItem(STORAGE_KEY);
+    } else if (ENVIRONMENTS.has(forcedEnvironment)) {
+      sessionStorage.setItem(STORAGE_KEY, forcedEnvironment);
+    }
+  } catch {
+    // Private mode can block sessionStorage.
+  }
 
+  let storedEnvironment = null;
+
+  try {
+    storedEnvironment = sessionStorage.getItem(STORAGE_KEY);
+  } catch {
+    storedEnvironment = null;
+  }
+
+  const isWebflowStaging = window.location.hostname.endsWith('.webflow.io');
   let environment = isWebflowStaging ? 'staging' : 'production';
 
-  if (forcedEnvironment === 'staging' || forcedEnvironment === 'production') {
-    environment = forcedEnvironment;
+  if (forcedEnvironment !== 'off') {
+    if (ENVIRONMENTS.has(forcedEnvironment)) {
+      environment = forcedEnvironment;
+    } else if (ENVIRONMENTS.has(storedEnvironment)) {
+      environment = storedEnvironment;
+    }
+  }
+
+  function markAsset(element, asset) {
+    element.dataset.ncAsset = asset;
+    element.dataset.ncProject = project;
+    element.dataset.ncEnvironment = environment;
+  }
+
+  function onAssetError(element, label) {
+    element.addEventListener('error', () => {
+      console.error(`[Nominal Crew] Failed to load ${label}: ${element.href || element.src}`);
+    });
+  }
+
+  if (environment === 'dev') {
+    const entryPath = devEntry.startsWith('/') ? devEntry : `/${devEntry}`;
+
+    const viteClient = document.createElement('script');
+    viteClient.type = 'module';
+    viteClient.src = `${devOrigin}/@vite/client`;
+    markAsset(viteClient, 'vite-client');
+    onAssetError(viteClient, 'Vite client');
+
+    const script = document.createElement('script');
+    script.type = 'module';
+    script.src = `${devOrigin}${entryPath}`;
+    markAsset(script, 'js');
+    onAssetError(script, 'script');
+    script.addEventListener('error', () => {
+      console.error('[Nominal Crew] Local Vite is not running. Start it with `pnpm dev`.');
+    });
+
+    document.head.appendChild(viteClient);
+    document.head.appendChild(script);
+
+    console.log(`[Nominal Crew] ${project} → ${environment} (${devOrigin})`);
+    return;
   }
 
   const baseUrl = `${CDN_ORIGIN}/${project}/${environment}`;
 
   const stylesheet = document.createElement('link');
-
   stylesheet.rel = 'stylesheet';
-  stylesheet.href = `${baseUrl}/main.css`;
-  stylesheet.dataset.ncAsset = 'css';
-  stylesheet.dataset.ncProject = project;
-  stylesheet.dataset.ncEnvironment = environment;
+  stylesheet.href = `${baseUrl}/${cssFile}`;
+  markAsset(stylesheet, 'css');
+  onAssetError(stylesheet, 'stylesheet');
 
   const script = document.createElement('script');
-
-  script.src = `${baseUrl}/main.js`;
+  script.src = `${baseUrl}/${jsFile}`;
   script.defer = true;
-  script.dataset.ncAsset = 'js';
-  script.dataset.ncProject = project;
-  script.dataset.ncEnvironment = environment;
-
-  stylesheet.addEventListener('error', () => {
-    console.error(`[Nominal Crew] Failed to load stylesheet: ${stylesheet.href}`);
-  });
-
-  script.addEventListener('error', () => {
-    console.error(`[Nominal Crew] Failed to load script: ${script.src}`);
-  });
+  markAsset(script, 'js');
+  onAssetError(script, 'script');
 
   document.head.appendChild(stylesheet);
   document.head.appendChild(script);
