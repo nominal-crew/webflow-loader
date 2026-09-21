@@ -2,7 +2,7 @@
 
 Tiny script included in every Nominal Crew Webflow site. It is the only custom-code snippet the site needs: it chooses which JS and CSS to load.
 
-It does not build or upload project assets. That is [`webflow-relay`](../webflow-relay) inside each site repo (see [`webflow-starter`](../webflow-starter)).
+It does not build or upload project assets. That is [`@nominalcrew/webflow-kit`](../webflow-kit) inside each site repo (see [`webflow-starter`](../webflow-starter)).
 
 ## What it does
 
@@ -21,7 +21,7 @@ On every full page load it:
 | **staging**    | `https://cdn.nominalcrew.com/{project}/staging/bundle.css` + `bundle.js`    |
 | **production** | `https://cdn.nominalcrew.com/{project}/production/bundle.css` + `bundle.js` |
 
-Dev has no separate CSS file: Vite serves CSS through the JS entry. Staging and production are the files uploaded by `webflow-relay deploy`.
+Dev has no separate CSS file: Vite serves CSS through the JS entry. Staging and production are the files uploaded by `webflow-kit deploy`.
 
 ## Webflow setup
 
