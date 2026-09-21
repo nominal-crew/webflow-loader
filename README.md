@@ -17,12 +17,12 @@ On every full page load it:
 
 Webflow custom code is the same in the Designer, on `*.webflow.io`, and on the custom domain. The Designer does not run this script, so CSS in the canvas has to be a static `<link>` — always the **staging** file.
 
-| Environment    | CSS                                                                   | JS                                                             |
-| -------------- | --------------------------------------------------------------------- | -------------------------------------------------------------- |
-| **canvas**     | Head `<link>` to staging (this script does not run)                   | none                                                           |
-| **dev**        | disables that `<link>`; Vite injects CSS through the JS entry         | `@vite/client` + `/src/js/main.js` on `https://localhost:3000` |
-| **staging**    | leaves the staging `<link>` as-is                                     | `{cdn}/{project}/staging/bundle.js`                            |
-| **production** | rewrites the `<link>` href to `{cdn}/{project}/production/bundle.css` | `{cdn}/{project}/production/bundle.js`                         |
+| Environment    | CSS                                                                   | JS                                                            |
+| -------------- | --------------------------------------------------------------------- | ------------------------------------------------------------- |
+| **canvas**     | Head `<link>` to staging (this script does not run)                   | none                                                          |
+| **dev**        | disables that `<link>`; Vite injects CSS through the JS entry         | `@vite/client` + `/src/js/main.js` on `http://localhost:3000` |
+| **staging**    | leaves the staging `<link>` as-is                                     | `{cdn}/{project}/staging/bundle.js`                           |
+| **production** | rewrites the `<link>` href to `{cdn}/{project}/production/bundle.css` | `{cdn}/{project}/production/bundle.js`                        |
 
 If the staging `<link>` is missing (old snippet), the loader injects the environment CSS itself so published pages still get a stylesheet.
 
@@ -50,7 +50,7 @@ Optional attributes (defaults shown):
   data-project="abma"
   data-js="bundle.js"
   data-css="bundle.css"
-  data-dev-origin="https://localhost:3000"
+  data-dev-origin="http://localhost:3000"
   data-dev-entry="/src/js/main.js"
 ></script>
 ```

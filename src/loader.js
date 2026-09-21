@@ -13,7 +13,7 @@
 
   const jsFile = currentScript.dataset.js?.trim() || 'bundle.js';
   const cssFile = currentScript.dataset.css?.trim() || 'bundle.css';
-  const devOrigin = (currentScript.dataset.devOrigin?.trim() || 'https://localhost:3000').replace(
+  const devOrigin = (currentScript.dataset.devOrigin?.trim() || 'http://localhost:3000').replace(
     /\/$/,
     '',
   );
