@@ -51,6 +51,30 @@
     }
   }
 
+  function assetUrl(environmentName, file) {
+    return `${CDN_ORIGIN}/${project}/${environmentName}/${file}`;
+  }
+
+  function isProjectStylesheet(link) {
+    try {
+      const url = new URL(link.href, document.baseURI);
+
+      if (url.origin !== CDN_ORIGIN) {
+        return false;
+      }
+
+      const parts = url.pathname.split('/').filter(Boolean);
+
+      return parts[0] === project && parts[2] === cssFile;
+    } catch {
+      return false;
+    }
+  }
+
+  function projectStylesheets() {
+    return [...document.querySelectorAll('link[rel="stylesheet"]')].filter(isProjectStylesheet);
+  }
+
   function markAsset(element, asset) {
     element.dataset.ncAsset = asset;
     element.dataset.ncProject = project;
@@ -63,7 +87,42 @@
     });
   }
 
+  function disableProjectStylesheets() {
+    projectStylesheets().forEach((link) => {
+      link.disabled = true;
+      markAsset(link, 'css');
+    });
+  }
+
+  function applyStylesheet(environmentName) {
+    const href = assetUrl(environmentName, cssFile);
+    const existing = projectStylesheets();
+    const stylesheet = existing[0] || document.createElement('link');
+
+    if (!stylesheet.rel) {
+      stylesheet.rel = 'stylesheet';
+    }
+
+    stylesheet.disabled = false;
+    markAsset(stylesheet, 'css');
+    onAssetError(stylesheet, 'stylesheet');
+
+    if (stylesheet.href !== href) {
+      stylesheet.href = href;
+    }
+
+    if (!stylesheet.isConnected) {
+      document.head.appendChild(stylesheet);
+    }
+
+    existing.slice(1).forEach((link) => {
+      link.disabled = true;
+    });
+  }
+
   if (environment === 'dev') {
+    disableProjectStylesheets();
+
     const entryPath = devEntry.startsWith('/') ? devEntry : `/${devEntry}`;
 
     const viteClient = document.createElement('script');
@@ -88,21 +147,13 @@
     return;
   }
 
-  const baseUrl = `${CDN_ORIGIN}/${project}/${environment}`;
-
-  const stylesheet = document.createElement('link');
-  stylesheet.rel = 'stylesheet';
-  stylesheet.href = `${baseUrl}/${cssFile}`;
-  markAsset(stylesheet, 'css');
-  onAssetError(stylesheet, 'stylesheet');
+  applyStylesheet(environment);
 
   const script = document.createElement('script');
-  script.src = `${baseUrl}/${jsFile}`;
+  script.src = assetUrl(environment, jsFile);
   script.defer = true;
   markAsset(script, 'js');
   onAssetError(script, 'script');
-
-  document.head.appendChild(stylesheet);
   document.head.appendChild(script);
 
   console.log(`[Nominal Crew] ${project} → ${environment}`);
