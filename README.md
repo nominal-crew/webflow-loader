@@ -10,8 +10,7 @@ On every full page load it:
 
 1. Reads `data-project` (required).
 2. Picks an environment:
-   - `?nc-env=dev|staging|production` wins, and is stored in `sessionStorage` for the tab
-   - `?nc-env=off` clears that override
+   - `?nc-env=dev|staging|production` in the URL wins for that load only (nothing is stored)
    - otherwise `*.webflow.io` → staging, custom domain → production
 3. Applies CSS and JS for that environment.
 
@@ -61,14 +60,13 @@ Optional attributes (defaults shown):
 https://project.webflow.io/?nc-env=dev
 https://www.example.com/?nc-env=staging
 https://project.webflow.io/?nc-env=production
-https://project.webflow.io/?nc-env=off
 ```
 
 `nc-env=dev` only works while `pnpm dev` is running in the site repo. If Vite is down, the console tells you to start it.
 
 `nc-env=production` on `*.webflow.io` also switches the Head `<link>` to production CSS. `nc-env=staging` on a custom domain leaves (or restores) the staging stylesheet.
 
-The query is kept in `sessionStorage` until the tab closes or you use `nc-env=off`.
+Without `?nc-env=` in the URL, `.webflow.io` loads staging and a custom domain loads production. Internal navigation that drops the query goes back to that default.
 
 ## CDN layout
 

@@ -1,6 +1,5 @@
 (() => {
   const CDN_ORIGIN = 'https://cdn.nominalcrew.com';
-  const STORAGE_KEY = 'nc-env';
   const ENVIRONMENTS = new Set(['dev', 'staging', 'production']);
 
   const currentScript = document.currentScript;
@@ -22,33 +21,11 @@
   const params = new URLSearchParams(window.location.search);
   const forcedEnvironment = params.get('nc-env');
 
-  try {
-    if (forcedEnvironment === 'off') {
-      sessionStorage.removeItem(STORAGE_KEY);
-    } else if (ENVIRONMENTS.has(forcedEnvironment)) {
-      sessionStorage.setItem(STORAGE_KEY, forcedEnvironment);
-    }
-  } catch {
-    // Private mode can block sessionStorage.
-  }
-
-  let storedEnvironment = null;
-
-  try {
-    storedEnvironment = sessionStorage.getItem(STORAGE_KEY);
-  } catch {
-    storedEnvironment = null;
-  }
-
   const isWebflowStaging = window.location.hostname.endsWith('.webflow.io');
   let environment = isWebflowStaging ? 'staging' : 'production';
 
-  if (forcedEnvironment !== 'off') {
-    if (ENVIRONMENTS.has(forcedEnvironment)) {
-      environment = forcedEnvironment;
-    } else if (ENVIRONMENTS.has(storedEnvironment)) {
-      environment = storedEnvironment;
-    }
+  if (ENVIRONMENTS.has(forcedEnvironment)) {
+    environment = forcedEnvironment;
   }
 
   function assetUrl(environmentName, file) {
